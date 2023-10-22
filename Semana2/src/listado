@@ -1,0 +1,7 @@
+total 36
+drwxrwx--- 2 rub rub  4096 sep 26 13:19 .
+drwxrwx--- 5 rub rub  4096 sep 26 13:12 ..
+-rw-r----- 1 rub rub     0 sep 26 13:19 listado
+-rw-rw---- 1 rub rub   162 sep  2 11:57 Makefile
+-rwxrwxr-x 1 rub rub 19880 sep 26 13:19 shell_ls_redir
+-rw-rw---- 1 rub rub  2307 sep 26 13:19 shell_ls_redir.c

@@ -1,0 +1,20 @@
+Minigrep:
+
+	·Consejos:
+		-Definir un buffer del tamaño máximo de línea.
+		-Reutilizar el buffer.
+		-Minimizar el número de llamadas al sistema.
+		-Usar perror.
+		-No incluir el final de línea en la cadena. (1234\n -> 1234\0)
+		-No podemos usar cadenas.
+		-En las escrituras, puede ser que escriba menos de lo que hemos pedido, entonces hay que comprobarlo
+		
+	Mientras que no termine el número de líneas
+		Compilamos la expresión regular
+		Si se cumple
+			Mostramos
+		Si no
+			Seguimos
+		
+Watchdir:
+			
