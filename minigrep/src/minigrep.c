@@ -7,6 +7,7 @@
 
 #define MAX_BUFFER_SIZE 1048576 // (1 MB = 1024^2 Bytes)
 #define MIN_BUFFER_SIZE 1
+#define DEFAULT_BUFFER_SIZE 1024
 #define MAX_LINE_SIZE 4096
 
 int coincideExpresionRegular(char *cadena, regex_t *regex){
@@ -14,6 +15,15 @@ int coincideExpresionRegular(char *cadena, regex_t *regex){
     return !regexec(regex, cadena, 2, pmatch, 0);
 }
 
+/**
+ * Lee una línea desde un buffer y la copia en una cadena de caracteres
+ * comenzando en la posición indiceLectura, línea terminará en '\0'.
+ *
+ * @param buffer: El buffer de caracteres desde el que se leen las líneas.
+ * @param linea: La cadena en la que se copia la línea leída.
+ * @param indiceLectura: Puntero al índice de lectura del buffer.
+ *                       Al final de la función se actualiza para apuntar al siguiente carácter y no leer '\n'.
+ */
 void leerLinea(char *buffer, char* linea, int *indiceLectura)
 {
     int i = 0;
@@ -30,11 +40,19 @@ void leerLinea(char *buffer, char* linea, int *indiceLectura)
         linea[i] = '\0';
     }
     else{
-        // Ver que hacemos en los casos en los que el buffer de lectura no acabe en \n por ejemplo: ["hola\nadios\nhastalu"]
+        //TODO: Ver que hacemos en los casos en los que el buffer de lectura no acabe en \n por ejemplo: ["hola\nadios\nhastalu"]
     }
 }
 
-void llenarBufferLectura(char *buffer, int bufferSize)
+/**
+ * Esta función llena un buffer de caracteres con datos leídos desde la entrada estándar (stdin).
+ * Los datos leídos se almacenan en el buffer hasta que se alcance el tamaño máximo especificado por 'bufferSize'.
+ *
+ * @param buffer: El buffer de caracteres en el que se almacenarán los datos leídos.
+ * @param bufferSize: El tamaño máximo del buffer.
+ * @return 0 Si no queda entrada estándar por leer, 1 en caso contrario.
+ */
+int llenarBufferLectura(char *buffer, int bufferSize)
 {
     ssize_t bytesRead = 0;
     ssize_t totalBytesRead = 0;
@@ -50,15 +68,17 @@ void llenarBufferLectura(char *buffer, int bufferSize)
         }
         else if (bytesRead == 0)
         {
-            break; // Pues no hay más que leer de la entrada estándar
+            return 0; // Pues no hay más que leer de la entrada estándar
         }
 
         totalBytesRead += bytesRead;
     }
+    return 1;
 }
 
 int main(int argc, char **argv){
-    int opt, flag = 0, bufferSize = 0;
+    int opt, flag = 0;
+    int bufferSize = DEFAULT_BUFFER_SIZE;
     char *regex_patron = NULL;
 
     optind = 1;
@@ -93,6 +113,11 @@ int main(int argc, char **argv){
         fprintf(stderr, "El tamaño máximo para el buffer es de %d bytes.\n", MAX_BUFFER_SIZE);
         exit(EXIT_FAILURE);
     }
+    else if (bufferSize < MIN_BUFFER_SIZE)
+    {
+        fprintf(stderr, "El tamaño mínimo para el buffer es de %d bytes.\n", MIN_BUFFER_SIZE);
+        exit(EXIT_FAILURE);
+    }
 
     // printf("r: \"%s\", s: %d, v: %d\n", regex_patron, bufferSize, flag);
 
@@ -121,24 +146,20 @@ int main(int argc, char **argv){
         exit(EXIT_FAILURE);
     }
 
-    llenarBufferLectura(bufferLectura, bufferSize);
-
     int indiceLectura = 0;
-    leerLinea(bufferLectura, intermedio, &indiceLectura);
-
-    if(coincideExpresionRegular(intermedio, &regex)){
-        printf("Coincide!\n");
+    if (!llenarBufferLectura(bufferLectura, bufferSize))
+    {
+        while (indiceLectura <= MAX_LINE_SIZE)
+        {
+            leerLinea(bufferLectura, intermedio, &indiceLectura);
+            if (coincideExpresionRegular(intermedio, &regex))
+                printf("%s\n", intermedio); //TODO: Cambiar por insertar al buffer de escritura
+        }
     }
-
-    llenarBufferLectura(bufferLectura, bufferSize);
-    leerLinea(bufferLectura, intermedio, &indiceLectura);
-
-
-
-
-
 
     free(bufferEscritura);
     free(bufferLectura);
     free(intermedio);
+
+    exit(EXIT_SUCCESS);
 }
